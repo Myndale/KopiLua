@@ -89,11 +89,11 @@ This second example shows this process in reverse, i.e. implementing the "sum" f
 		}
 	} 
 
-This second example also introduces two additiional concepts. First, a global table "foo" is created, and sum is added as a member function. Secondly, the luaL_loadfile function is being used to load the "program.lua", which could contain a simply program such as the following to call the C# implementation directly: 
+This second example also introduces two additiional concepts. First, a global table "foo" is created, and sum is added as a member function. Secondly, the luaL_loadfile function is being used to load the "program.lua", which could contain a simple program such as the following to call the C# implementation directly: 
 
 	print(foo.sum(5, 6))	-- output: 11
 
-This final snippet shows an example of how you might typically use KopiLua in a real-world application where you wouldn't want the VM running constantly on the main GUI thread. In this example a seperate task is started, and the Lua program sits in a loop repeatedly printing a character at 1-second intervals. Lua does not have a "delay" function as such, so we provide a global function ourselves with a C# implementation that calls Task.Delay() so as to "sleep" the VM thread during wait times. Finally, we include a CancellationTokenSource that the main thread can use to signal the task when it's time to terminate.
+This final example shows how you might use KopiLua in a real-world application where you don't want the VM running constantly on the main GUI thread. In this example the VM is run in its own task and a Lua program sits in a loop repeatedly printing characters at 1-second intervals. Lua does not have a "delay" function as such, so we provide a global function ourselves with a C# implementation that calls Task.Delay() so as to "sleep" the VM thread during these wait times (a real application would typically use synchronization objects to wake the task up in response to events triggerd by the main application). Finally, we include a CancellationTokenSource that the main thread can use to signal the task when it's time to terminate:
 
 	using System;
 	using System.Threading;
