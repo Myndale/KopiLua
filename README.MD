@@ -1,5 +1,5 @@
 # Kopi Lua v 1.0 #
-Copyright © 2017 Mark Feldman. All Rights Reserved.
+Copyright © 2018 Mark Feldman. All Rights Reserved.
 
 ## Introduction ##
 
@@ -166,6 +166,10 @@ Kopi Lua provides a project file for Microsoft Visual Community 2017 containing 
 - KopiLua is a class library containing the port of the core Lua VM and parser.
 - Lua is a Windows console application port of the Lua 5.1.4 interpreter.
 - Luac is a Windows console application port of the Lua 5.1.4 compiler.
+- Examples:
+	- Example1 shows how to call a Lua function from C#
+	- Example2 shows how to call a C# function from Lua
+	- Example3 shows how to run the VM in it's own Task
 
 At this time all projects containing the Lua core files must be compiled with the following compilation flags, changing them will break the compile:
 
