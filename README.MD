@@ -1,25 +1,173 @@
-# Kopi Lua v 0.1 (Alpha) #
-Copyright © 2009 Mark Feldman. All Rights Reserved.
+# Kopi Lua v 1.0 #
+Copyright © 2017 Mark Feldman. All Rights Reserved.
 
 ## Introduction ##
 
 Kopi Lua is a C# port of the Lua v.5.1.4 virtual machine, parser, libraries and command-line utilities. KL is not simply an interface to a compiled DLL, all original code has been ported over to managed C#.
 
-Please note that this is an alpha release only. I've tested it against numerous test samples and it seems to mostly hold up as well as the x86 C implementation upon which it was based. That said, I'm sure there are many bugs lurking within, so if you encounter any then please let me know. Bear in mind that managed environments are notoriously restrictive, so I'm sure the VM can be forcibly crashed without too much trouble. The code has not been subjected to rigorous scrutiny and is by no means meant to be regarded as secure in its current state.
-
-## Download ##
-
 The latest version of Kopi Lua can be downloaded from the GitHub repository: [https://github.com/Myndale/KopiLua](https://github.com/Myndale/KopiLua)
+
+## How to use KopiLua in a C# Application ##
+
+KopiLua implements the standard Lua interface functions, so interfacing is done virtually the same as for C applications.
+
+The following is an adapted version of Goutham Balaraman's ["Minimal Example of Calling Lua Functions from C++"](http://gouthamanbalaraman.com/blog/minimal-example-lua-function-cpp.html). It demonstrates the minimum code needed to initialize the virtual machine, load/parse a Lua script and call it from C#:
+
+	using static KopiLua.Lua;
+
+	public class Program
+	{
+		static int Main(string[] args)
+		{
+			// initialization
+			var L = lua_open();
+			luaL_openlibs(L);
+
+			// execute script
+			var lua_script = "function sum(a, b) return a+b; end"; // a function that returns sum of two
+			luaL_loadbuffer(L, lua_script, (uint)lua_script.Length, "program");			
+			lua_pcall(L, 0, 0, 0);
+
+			// load the function from global
+			lua_getglobal(L, "sum");
+			if (lua_isfunction(L, -1))
+			{
+				// push function arguments into stack
+				lua_pushnumber(L, 5.0);
+				lua_pushnumber(L, 6.0);
+				lua_pcall(L, 2, 1, 0);
+				double sumval = 0.0;
+				if (!lua_isnil(L, -1))
+				{
+					sumval = lua_tonumber(L, -1);
+					lua_pop(L, 1);
+				}
+
+				// note that C-style printf is available via the KopiLua library
+				printf("sum=%lf\n", sumval);
+			}
+
+			// cleanup
+			lua_close(L);
+			return 0;
+		}
+	}     
+  
+This second example shows this process in reverse, i.e. implementing the "sum" function in C# and calling it from a Lua script. 
+
+	using static KopiLua.Lua;
+
+	public class Program
+	{
+		static int Main(string[] args)
+		{
+			// initialization
+			var L = lua_open();
+			luaL_openlibs(L);
+
+			// set up a table
+			lua_newtable(L);
+			lua_pushstring(L, "sum");
+			lua_pushcfunction(L, (_L) =>
+			{
+				var a = luaL_checknumber(_L, 1);		// get a
+				var b = luaL_checknumber(_L, 2);        // get b
+				var c = a + b;
+				lua_pushnumber(_L, c);					// push result
+				return 1;								// number of return parameters
+			});
+			lua_rawset(L, -3);
+			lua_setglobal(L, "foo");
+
+			// execute script
+			luaL_loadfile(L, "program.lua");
+			lua_pcall(L, 0, 0, 0);
+
+			// cleanup
+			lua_close(L);
+			return 0;
+		}
+	} 
+
+This second example also introduces two additiional concepts. First, a global table "foo" is created, and sum is added as a member function. Secondly, the luaL_loadfile function is being used to load the "program.lua", which could contain a simply program such as the following to call the C# implementation directly: 
+
+	print(foo.sum(5, 6))	-- output: 11
+
+This final snippet shows an example of how you might typically use KopiLua in a real-world application where you wouldn't want the VM running constantly on the main GUI thread. In this example a seperate task is started, and the Lua program sits in a loop repeatedly printing a character at 1-second intervals. Lua does not have a "delay" function as such, so we provide a global function ourselves with a C# implementation that calls Task.Delay() so as to "sleep" the VM thread during wait times. Finally, we include a CancellationTokenSource that the main thread can use to signal the task when it's time to terminate.
+
+	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
+	using static KopiLua.Lua;
+
+	public class Program
+	{
+		private static CancellationTokenSource CancelSource;
+
+		static void Main()
+		{
+			// start the Lua VM task
+			CancelSource = new CancellationTokenSource();
+			var vmTask = Task.Run(() => RunVM(), CancelSource.Token);
+
+			// Wait for a keypress
+			Console.Write("VM is running, press any key to stop");
+			Console.ReadKey();
+
+			// cancel the task and wait for it to finish
+			CancelSource.Cancel();
+			vmTask.Wait();
+		}
+
+		static string lua_script =
+			"while true do		" +
+			"	io.write(\".\")	" +
+			"	delay(1000)		" +
+			"end";
+
+		static void RunVM()
+		{
+			lua_State L = null;
+
+			try
+			{
+				// initialization
+				L = lua_open();
+				luaL_openlibs(L);
+
+				// add a delay function
+				lua_pushcfunction(L, Delay);
+				lua_setglobal(L, "delay");
+
+				// execute script
+				luaL_loadbuffer(L, lua_script, (uint)lua_script.Length, "program");
+				lua_pcall(L, 0, 0, 0);
+
+			}
+			finally
+			{
+				// cleanup
+				lua_close(L);
+			}
+		}
+
+		static int Delay(lua_State L)
+		{
+			var ms = luaL_checkinteger(L, 1);        // get wait time
+			Task.Delay(TimeSpan.FromMilliseconds(ms), CancelSource.Token).Wait();
+			return 0;
+		}
+	}        
 
 ## Projects and Solutions ##
 
-Kopi Lua provides a project file for Microsoft Visual C# 2008 Express Edition containing three solutions:
+Kopi Lua provides a project file for Microsoft Visual Community 2017 containing three solutions:
 
 - KopiLua is a class library containing the port of the core Lua VM and parser.
 - Lua is a Windows console application port of the Lua 5.1.4 interpreter.
 - Luac is a Windows console application port of the Lua 5.1.4 compiler.
 
-Note that although the KopiLua solution compiles into a DLL, the source files have also been added to Lua and Luac so that they produce standalone executables. At this time all projects containing the Lua core files must be compiled with the following compilation flags, changing them will break the compile:
+At this time all projects containing the Lua core files must be compiled with the following compilation flags, changing them will break the compile:
 
     LUA_CORE;_WIN32;LUA_COMPAT_VARARG;LUA_COMPAT_MOD;LUA_COMPAT_GFIND;CATCH_EXCEPTIONS
 
@@ -69,10 +217,15 @@ The full text of the license can be found on the Lua site at [http://www.lua.org
 
 The C# implementation of printf that Kopi Lua uses was developed by Richard Prinz and is bundled as-is and unmodified. Its use is subject to the terms of The Code Project Open License (CPOL) 1.02 which state that both source code and executable "can be used in commercial applications", "can be redistributed" and "can be modified to create derivative works".
 
+## History ##
+
+Nov 18, 2009: Initial release of v0.1 (Alpha)
+May 24, 2018: Released v1.0. Upgraded to VC2017/.NET 4.6.1.
+
 ## Acknowledgements ##
 
 Thanks to Niki Bowe, Nick McVeity and Pete Henry at Infinite Interactive for introducing me to Lua and engaging in so many discussions about it. Richard Prinz saved me a considerable amount of work by making his C# implementation of printf available to the public. And of course thanks to the creators of Lua and the members of the Lua mailing list for all their ongoing work.
 
-Mark Feldman, November 2009.
+Mark Feldman, November 2017.
 
 mailto:lua NOTTHISBIT @ppl-pilot.com
