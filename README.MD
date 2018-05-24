@@ -70,11 +70,11 @@ This second example shows this process in reverse, i.e. implementing the "sum" f
 			lua_pushstring(L, "sum");
 			lua_pushcfunction(L, (_L) =>
 			{
-				var a = luaL_checknumber(_L, 1);		// get a
-				var b = luaL_checknumber(_L, 2);        // get b
+				var a = luaL_checknumber(_L, 1); // get a
+				var b = luaL_checknumber(_L, 2); // get b
 				var c = a + b;
-				lua_pushnumber(_L, c);					// push result
-				return 1;								// number of return parameters
+				lua_pushnumber(_L, c);           // push result
+				return 1;                        // number of return parameters
 			});
 			lua_rawset(L, -3);
 			lua_setglobal(L, "foo");
@@ -89,11 +89,11 @@ This second example shows this process in reverse, i.e. implementing the "sum" f
 		}
 	} 
 
-This second example also introduces two additiional concepts. First, a global table "foo" is created, and sum is added as a member function. Secondly, the luaL_loadfile function is being used to load the "program.lua", which could contain a simple program such as the following to call the C# implementation directly: 
+This example also introduced two additional concepts. First, a global table "foo" is created, and sum is added as a member function. Secondly, the luaL_loadfile function is being used to load the "program.lua", which could contain a simple program such as the following to call the C# implementation directly: 
 
-	print(foo.sum(5, 6))	-- output: 11
+	print(foo.sum(5, 6))  -- output: 11
 
-This final example shows how you might use KopiLua in a real-world application where you don't want the VM running constantly on the main GUI thread. In this example the VM is run in its own task and a Lua program sits in a loop repeatedly printing characters at 1-second intervals. Lua does not have a "delay" function as such, so we provide a global function ourselves with a C# implementation that calls Task.Delay() so as to "sleep" the VM thread during these wait times (a real application would typically use synchronization objects to wake the task up in response to events triggerd by the main application). Finally, we include a CancellationTokenSource that the main thread can use to signal the task when it's time to terminate:
+This final example shows how you might use KopiLua in a real-world application where you don't want the VM running constantly on the main GUI thread. In this example the VM is run in its own task and a Lua program sits in a loop repeatedly printing characters at 1-second intervals. Lua does not have a "delay" function as such, so we provide a global function ourselves with a C# implementation that calls Task.Delay() so as to "sleep" the VM thread during these wait times (a real application would typically use synchronization objects to wake the task up in response to events triggered by the main application). Finally, we include a CancellationTokenSource that the main thread can use to signal the task when it's time to terminate:
 
 	using System;
 	using System.Threading;
@@ -193,7 +193,7 @@ The original source is littered with C-style conditionals of the form “if (val
 
 There is a significant amount of mixing of 16-bit/32-bit and signed/unsigned arithmetic; in most cases a simple cast was enough to fix this. It will, however, need to be cleaned up at some point as it may be having an effect on performance.
 
-The C code makes judicious use of pointer arithmetic, which presented a particularly challenging technical difficulty. When KL creates or resizes an array it loops through every element and stores a pointer to the array as well as it's position index within it. Overloaded operators are then used to reference neighbouring elements. Similarly, statements that use indirection such as “*s” etc have been converted to array look-ups of the form “s[0]”. In certain cases the code works with pointer pointers (e.g. GCObject **), this was solved by creating an intermediate class to represent a pointer-to-array (i.e. CGObjectRef).
+The C code makes judicious use of pointer arithmetic, which presented a particularly challenging technical difficulty. When KL creates or resizes an array it loops through every element and stores a pointer to the array as well as its position index within it. Overloaded operators are then used to reference neighbouring elements. Similarly, statements that use indirection such as “*s” etc have been converted to array look-ups of the form “s[0]”. In certain cases the code works with pointer pointers (e.g. GCObject **), this was solved by creating an intermediate class to represent a pointer-to-array (i.e. CGObjectRef).
 
 The handling of strings is a very specific example of arrays that needed to be solved with a custom object (CharPtr) which stores a pointer to the char array and an offset into that array. Operator overloading then allows for the code to work with the string similar to the way in which the original code works with the char *. One notable difference here is the fact that in the original C code a char * passed to a function resides on the stack, so the function can change it at will. In KL the CharPtr object is a reference, so if any changes to the index itself are made then a local copy of the CharPtr has to be made first so that the object passed in by the calling function isn't corrupted. Chars are stored internally as Unicode but are treated as ASCII when converting to and from their byte representations i.e. the source code uses Unicode chars but from the perspective of the Lua scripts all strings appear as ASCII.
 
@@ -219,13 +219,13 @@ The C# implementation of printf that Kopi Lua uses was developed by Richard Prin
 
 ## History ##
 
-Nov 18, 2009: Initial release of v0.1 (Alpha)
-May 24, 2018: Released v1.0. Upgraded to VC2017/.NET 4.6.1.
-
+- Nov 18, 2009: Initial release of v0.1 (Alpha)
+- May 24, 2018: Released v1.0. Upgraded to VC2017/.NET 4.6.1.
+ 
 ## Acknowledgements ##
 
 Thanks to Niki Bowe, Nick McVeity and Pete Henry at Infinite Interactive for introducing me to Lua and engaging in so many discussions about it. Richard Prinz saved me a considerable amount of work by making his C# implementation of printf available to the public. And of course thanks to the creators of Lua and the members of the Lua mailing list for all their ongoing work.
 
-Mark Feldman, November 2017.
+Mark Feldman, November 2018.
 
 mailto:lua NOTTHISBIT @ppl-pilot.com
