@@ -1350,17 +1350,21 @@ namespace KopiLua
 
 		public static CharPtr fgets(CharPtr str, Stream stream)
 		{
-			int index = 0;
+			var index = 0;
 			try
 			{
-				while (true)
+				var buffer = new byte[str.chars.Length];
+				int num = stdin.Read(buffer, 0, buffer.Length);
+				for (int i = 0; i < num; i++)
 				{
-					str[index] = (char)stream.ReadByte();
-					if (str[index] == '\n')
+					var ch = (char)buffer[i];
+					if (ch == '\r')
+						continue;
+					str[index++] = ch;
+					if (ch == '\n')
 						break;
 					if (index >= str.chars.Length)
 						break;
-					index++;
 				}
 			}
 			catch
