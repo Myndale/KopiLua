@@ -161,7 +161,7 @@ This final example shows how you might use KopiLua in a real-world application w
 
 ## Projects and Solutions ##
 
-Kopi Lua provides a project file for Microsoft Visual Community 2017 containing three solutions:
+Kopi Lua provides a project file for Microsoft Visual Community 2017 containing the following solutions:
 
 - KopiLua is a class library containing the port of the core Lua VM and parser.
 - Lua is a Windows console application port of the Lua 5.1.4 interpreter.
@@ -228,8 +228,7 @@ The C# implementation of printf that Kopi Lua uses was developed by Richard Prin
  
 ## Acknowledgements ##
 
-Thanks to Niki Bowe, Nick McVeity and Pete Henry at Infinite Interactive for introducing me to Lua and engaging in so many discussions about it. Richard Prinz saved me a considerable amount of work by making his C# implementation of printf available to the public. And of course thanks to the creators of Lua and the members of the Lua mailing list for all their ongoing work.
+Thanks to Niki Bowe, Nick McVeity and Pete Henry at Infinite Interactive for introducing me to Lua and engaging in our many animated discussions about it. Richard Prinz saved me a considerable amount of work by making his C# implementation of printf available to the public. And of course thanks to the creators of Lua and the members of the Lua mailing list for all their ongoing work.
 
-Mark Feldman, November 2018.
-
+Mark Feldman (aka Myndale), May 2018.  
 mailto:lua NOTTHISBIT @ppl-pilot.com

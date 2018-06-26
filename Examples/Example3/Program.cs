@@ -29,8 +29,8 @@ namespace Example3
 
 		static string lua_script =
 			"while true do		" +
-			"	io.write(\".\")	" +
 			"	delay(1000)		" +
+			"	io.write(\".\")	" +
 			"end";
 
 		static void RunVM()
