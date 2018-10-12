@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("KopiLua")]
 [assembly: AssemblyDescription("A C# port of the Lua v.5.1.4 virtual machine, parser and libraries.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Mark Feldman")]
 [assembly: AssemblyProduct("KopiLua")]
 [assembly: AssemblyCopyright("Copyright © Mark Feldman 2018")]
 [assembly: AssemblyTrademark("")]

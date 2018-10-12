@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Mark Feldman</authors>
+    <owners>Mark Feldman</owners>
+    <licenseUrl>http://en.wikipedia.org/wiki/MIT_License</licenseUrl>
+    <projectUrl>https://github.com/Myndale/KopiLua</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>First NuGet release. Please visit project URL for details and examples of how to integrate a Lua virtual machine into your C# application.</releaseNotes>
+    <copyright>Copyright 2018 Mark Feldman. All Rights Reserved.</copyright>
+    <tags>Lua KopiLua VM scripting</tags>
+  </metadata>
+</package>
