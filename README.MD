@@ -11,6 +11,8 @@ The latest version of Kopi Lua can be downloaded from the GitHub repository: [ht
 
 KopiLua implements the standard Lua interface functions, so interfacing is done virtually the same as for C applications.
 
+***Very important: Lua scripts must be encoded as ASCII files! If you create a new script file using Visual Studio 2017 (say) then the encoding will default to UTF-8 and the file will not load. The safest workaround is to create the file with something like Notepad and then add the file to your project.***
+
 The following is an adapted version of Goutham Balaraman's ["Minimal Example of Calling Lua Functions from C++"](http://gouthamanbalaraman.com/blog/minimal-example-lua-function-cpp.html). It demonstrates the minimum code needed to initialize the virtual machine, load/parse a Lua script and call it from C#:
 
 	using static KopiLua.Lua;
